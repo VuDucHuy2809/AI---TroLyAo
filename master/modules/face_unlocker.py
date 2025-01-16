@@ -2,22 +2,22 @@ import cv2
 import os
 from os.path import isfile, join
 
-face_classifier = cv2.CascadeClassifier('Cascade/haarcascade_frontalface_default.xml')
+face_classifier = cv2.CascadeClassifier('C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\cv2\\data\\haarcascade_frontalface_default.xml')
 
 def face_detector(img, size=0.5):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	roi = None  # gán giá trị mặc định cho biến "roi"
 	faces = face_classifier.detectMultiScale(gray, 1.3, 5)
 
-	if faces is ():
+	if faces == 0:
 		return img,[]
 
 	for (x,y,w,h) in faces:
 		cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,255), 2)
-		
 		roi = img[y:y+h, x:x+w]
 		roi = cv2.resize(roi, (200,200))
 
-	return img,roi
+	return [img, roi]
 
 def startDetecting():
 	try:
@@ -30,10 +30,15 @@ def startDetecting():
 	flag = False
 	cap = cv2.VideoCapture(0)
 
+# BIẾN RET BÁO LỖI KHÔNG TÌM THẤY TRONG PYPLANCE
+# LỖI XẢY RA DO LỖI PHIÊN BẢN MODULES RET ĐÃ BỊ XÓA 
+# CHƯA TÌM RA ĐƯỢC GIẢI PHÁP THAY THẾ 
+
 	while True:
 		ret, frame = cap.read()
 		image, face = face_detector(frame)
-
+		if not face:
+			continue
 		try:
 			face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 			result = model.predict(face)
@@ -77,7 +82,7 @@ def clickPhoto():
 
 	cam = cv2.VideoCapture(0)
 	_, frame = cam.read()
-	playsound.playsound('assets/audios/photoclick.mp3')
+	playsound.playsound('C:/VScode/AI---TroLyAo/master/assets/audios/photoclick.mp3')
 	imageName = 'Camera/Camera_'+str(datetime.now())[:19].replace(':', '_')+'.png'
 	cv2.imwrite(imageName, frame)
 	cam.release()

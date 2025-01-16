@@ -6,8 +6,8 @@ import numpy as np
 import os
 from os.path import isfile, join
 from threading import Thread
-from .user_handler import UserData
-from . import face_unlocker as FU
+from user_handler import UserData
+import face_unlocker as FU
 
 background, textColor = 'black', '#F6FAFB'
 background, textColor = textColor, background
@@ -18,15 +18,15 @@ user_name = ''
 user_gender = ''
 
 try:
-	face_classifier = cv2.CascadeClassifier('Cascade/haarcascade_frontalface_default.xml')
+	face_classifier = cv2.CascadeClassifier('C:/VScode/AI---TroLyAo/master/Cascade/haarcascade_frontalface_default.xml')
 except Exception as e:
 	print('Cascade File is missing...')
 	raise SystemExit
 
-if os.path.exists('userData')==False:
+if os.path.exists('C:/VScode/AI---TroLyAo/userData')==False:
 	os.mkdir('userData')
-if os.path.exists('userData/faceData')==False:
-	os.mkdir('userData/faceData')
+if os.path.exists('C:/VScode/AI---TroLyAo/userData/faceData')==False:
+	os.mkdir('C:/VScode/AI---TroLyAo/userData/faceData')
 
 
 ###### ROOT1 ########
@@ -50,52 +50,63 @@ def startLogin():
 
 ####### ROOT2 ########
 def trainFace():
-	data_path = 'userData/faceData/'
+	data_path = 'C:/VScode/AI---TroLyAo/userData/faceData/'
 	onlyfiles = [f for f in os.listdir(data_path) if isfile(join(data_path, f))]
 
 	Training_data = []
 	Labels = []
 
 	for i, files in enumerate(onlyfiles):
-		image_path = data_path + onlyfiles[i]
+		image_path = os.path.join(data_path,files)
 		images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 		
 		Training_data.append(np.asarray(images, dtype=np.uint8))
-		Labels.append(i)
+		Labels.append(np.asarray(i, dtype=np.int32))
 
-
+# MÔ HÌNH TRAINING FACE VẪN CHƯA HOẠT ĐỘNG DO LỖI CỦA OPENCV KHI TRAINING XONG
+# THÌ MỌI THỨ VẪN KHÔNG THAY ĐỔI 
+# LỖI NÀY XUẤT PHÁT TỪ PHẦN MODEL TRAINING CV2.FACE KHÔNG CÓ THUỘC TÍNH CỦA FACE
+# ĐÃ THỬ CÁCH REINSTALL NMA VẪN KHÔNG CÓ KẾT QUẢ 
+# ĐÃ NÂNG CẤP OPENCV LÊN PHIÊN BẢN MỚI NHẤT 4.8 VẪN KHÔNG ĐƯỢC 
+# CÓ THỂ LỖI TỪ MÔ HÌNH TRAINING FACE DỰNG SẴN 
+# OPENCV CONTRIBUTE ĐÃ THỬ INSTALL LÊN PHIÊN BẢN VẪN KHÔNG ĐC 
+# CÂU LỆNH KHÔNG CÓ VẤN ĐỀ J SẼ THỬ CÁCH DÙNG INSTALL TỪ MÔ HÌNH CHƯA ĐƯỢC TRAINING 
+# SỬ DỤNG CÁCH CỦA OPENVINO ĐỂ TRAIN LẠI TỪ ĐÂU 
+# CÁCH DỤNG OPENVINO SẼ PHẢI UNSTILL OPENCV VS CONTRICV ĐI (CHÚ Ý NÊN CÀI LẠI OPENCV)
+	
 	Labels = np.asarray(Labels, dtype=np.int32)
 
-	model = cv2.face.LBPHFaceRecognizer_create()
-	model.train(np.asarray(Training_data), np.asarray(Labels))
-
+	model = cv2.face.LBPHFaceRecognizer_create()	
+	model.train([Training_data], np.array(Labels))
+	
 	print('Model Trained Successfully !!!')
-	model.save('userData/trainer.yml')
+	model.save('C:/VScode/AI---TroLyAo/userData/trainer.yml')
 	print('Model Saved !!!')
 
-def face_extractor(img):
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-	faces = face_classifier.detectMultiScale(gray, 1.3, 5)
+def face_extractor(img):    
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = face_classifier.detectMultiScale(gray)
 
-	#if faces is ():
-		#return None
+    #if np.squeeze(faces).ndim == 0:
+    #    return None
 
-	#for (x, y, w, h) in faces:
-		#cropped_face = img[y:y+h, x:x+w]
+    for (x, y, w, h) in faces:
+        cropped_face = cv2.rectangle(img, (x,y) , (x + w , y + h ), (0,255,0), 2)
 
-	#return cropped_face
+    return cropped_face
+# CẦN KHAI BÁO STARTCAPURING ĐỂ TRÁNH SAU KHI TRAIN SẼ QUAY LẠI TỪ ĐẦU 
 
 cap = None
 count = 0
-def startCapturing():
+def startCapturing():	
 	global count, cap
-	ret, frame = cap.read()
+	ret , frame = cap.read()
 	if face_extractor(frame) is not None:
 		count += 1
 		face = cv2.resize(face_extractor(frame), (200, 200))
 		face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
-		file_name_path = 'userData/faceData/img' + str(count) + '.png'
+		file_name_path = 'C:/VScode/AI---TroLyAo/userData/faceData/img' + str(count) + '.png'
 		cv2.imwrite(file_name_path, face)
 		print(count)
 		progress_bar['value'] = count
@@ -169,7 +180,7 @@ def raise_frame(frame):
 
 
 root = Tk()
-root.title('F.R.I.D.A.Y.')
+root.title('SPEECHBOT <3')
 w_width, w_height = 350, 600
 s_width, s_height = root.winfo_screenwidth(), root.winfo_screenheight()
 x, y = (s_width/2)-(w_width/2), (s_height/2)-(w_height/2)
@@ -188,7 +199,7 @@ for f in (root1, root2, root3, root4):
 ########  MAIN SCREEN  #########
 ################################
 
-image1 = Image.open('assets/images/home2.jpg')
+image1 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/home2.jpg')
 image1 = image1.resize((300,250))
 defaultImg1 = ImageTk.PhotoImage(image1)
 
@@ -205,7 +216,7 @@ welcLbl.pack(padx=10, pady=20)
 loginStatus = Label(root1, text='LOCKED', font=('Arial Bold', 15), bg=background, fg='red')
 loginStatus.pack(pady=(40,20))	
 
-if os.path.exists('userData/trainer.yml')==False:
+if os.path.exists('C:/VScode/AI---TroLyAo/userData/trainer.yml')==False:
 	loginStatus['text'] = 'Your Face is not registered'
 	addFace = Button(root1, text='   Register Face   ', font=('Arial', 12), bg='#018384', fg='white', relief=FLAT, command=lambda:raise_frame(root2))
 	addFace.pack(ipadx=10)
@@ -220,7 +231,8 @@ faceStatus.pack(pady=5)
 ########  FACE ADD SCREEN  #######
 ##################################
 
-image2 = Image.open('assets/images/defaultFace4.png')
+# LƯU Ý CÁCH ĐƯỜNG DẪN PHẢI TỪ c: TRỞ ĐI NẾU KHÔNG SẼ BÁO KHÔNG TÌM THẤY ĐƯỜNG DẪN 
+image2 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/defaultFace4.png')
 image2 = image2.resize((300, 250))
 defaultImg2 = ImageTk.PhotoImage(image2)
 
@@ -280,28 +292,28 @@ avatarContainer = Frame(root3, bg=background, width=300, height=500)
 avatarContainer.pack(pady=10)
 size = 100
 
-avtr1 = Image.open('assets/images/avatars/a1.png')
+avtr1 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a1.png')
 avtr1 = avtr1.resize((size, size))
 avtr1 = ImageTk.PhotoImage(avtr1)
-avtr2 = Image.open('assets/images/avatars/a2.png')
+avtr2 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a2.png')
 avtr2 = avtr2.resize((size, size))
 avtr2 = ImageTk.PhotoImage(avtr2)
-avtr3 = Image.open('assets/images/avatars/a3.png')
+avtr3 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a3.png')
 avtr3 = avtr3.resize((size, size))
 avtr3 = ImageTk.PhotoImage(avtr3)
-avtr4 = Image.open('assets/images/avatars/a4.png')
+avtr4 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a4.png')
 avtr4 = avtr4.resize((size, size))
 avtr4 = ImageTk.PhotoImage(avtr4)
-avtr5 = Image.open('assets/images/avatars/a5.png')
+avtr5 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a5.png')
 avtr5 = avtr5.resize((size, size))
 avtr5 = ImageTk.PhotoImage(avtr5)
-avtr6 = Image.open('assets/images/avatars/a6.png')
+avtr6 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a6.png')
 avtr6 = avtr6.resize((size, size))
 avtr6 = ImageTk.PhotoImage(avtr6)
-avtr7 = Image.open('assets/images/avatars/a7.png')
+avtr7 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a7.png')
 avtr7 = avtr7.resize((size, size))
 avtr7 = ImageTk.PhotoImage(avtr7)
-avtr8 = Image.open('assets/images/avatars/a8.png')
+avtr8 = Image.open('C:/VScode/AI---TroLyAo/master/assets/images/avatars/a8.png')
 avtr8 = avtr8.resize((size, size))
 avtr8 = ImageTk.PhotoImage(avtr8)
 
@@ -347,6 +359,6 @@ Label(root4, text="Launch the APP again to get started the conversation with you
 
 Button(root4, text='     OK     ', bg='#0475BB', fg='white',font=('Arial Bold', 18), bd=0, relief=FLAT, command=lambda:quit()).pack(pady=50)
 
-root.iconbitmap('assets/images/assistant2.ico')
+root.iconbitmap('C:/VScode/AI---TroLyAo/master/assets/images/assistant2.ico')
 raise_frame(root1)
 root.mainloop()

@@ -15,7 +15,7 @@ def startTimer(query):
 		time = int(nums[0])
 	else: return
 
-	print("Timer Started")
+	print("Timer Started")	
 	sleep(time)
 	Thread(target=timer).start()
 	playsound.playsound("assets/audios/Timer.mp3")

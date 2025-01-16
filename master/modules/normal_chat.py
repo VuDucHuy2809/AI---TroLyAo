@@ -51,7 +51,7 @@ def chat(text):
 
 	return result
 
-data = json.load(open('assets/normal_chat.json', encoding='utf-8'))
+data = json.load(open('master/assets/normal_chat.json', encoding='utf-8'))
 
 def reply(query):
 	if query in data:

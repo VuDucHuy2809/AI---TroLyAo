@@ -1,0 +1,53 @@
+Cài đặt OpenCV dựng sẵn ( pip install opencv-contrib-python ) cho phép bạn sử dụng cv2.face.LBPHFaceRecognizer_create(). Tuy nhiên, khi sử dụng OpenCV dựng sẵn này, không thể sử dụng mô-đun OpenCV DNN .
+
+Để sử dụng mô-đun OpenCV DNN, OpenCV bắt buộc phải được xây dựng với OpenVINO™ Inference Engine (OpenVINO™ backend). Bạn có thể sử dụng OpenCV từ OpenVINO™. Nó đã được biên dịch với OpenVINO Inference Engine. (Giả sử bạn đang sử dụng OpenVINO™ 2021.4.2 kể từ khi bắt đầu từ bản phát hành 2022.1.1, OpenVINO™ không bao gồm OpenCV.)
+
+Dù sao đi nữa, OpenCV từ OpenVINO™ không bao gồm các mô-đun bổ sung trong OpenCV_Contrib dẫn đến lỗi sau nếu sử dụng cv2.face.LBPHFaceRecognizer_create().
+
+AttributeError: mô-đun 'cv2' không có thuộc tính 'khuôn mặt'
+
+Các bước để xây dựng OpenCV tùy chỉnh với bộ cờ biên dịch tối thiểu:
+
+1. (Khuyến nghị) Gỡ cài đặt OpenCV dựng sẵn.
+
+gỡ cài đặt pip opencv opencv-contrib-python
+
+ 
+
+2. Tải xuống OpenCV từ kho lưu trữ opencv/opencv .
+
+git clone --recurse-submodules https://github.com/opencv/opencv.git
+
+ 
+
+3. Tải xuống các mô-đun bổ sung của OpenCV từ kho lưu trữ opencv/opencv_contrib .
+
+git clone --recurse-submodules https://github.com/opencv/opencv_contrib.git
+
+4. Tạo thư mục bản dựng và điều hướng đến thư mục bản dựng.
+
+cd opencv
+
+bản dựng mkdir && bản dựng cd
+
+5. (Tùy chọn) Bạn có thể cần cài đặt một số phụ thuộc bổ sung cho OpenCV.
+
+sudo apt cài đặt libcanberra-gtk-mô-đun libtbb-dev
+
+6. (Tùy chọn) Tải xuống và cài đặt OpenVINO™.
+
+https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/download.html
+
+7. Thiết lập các biến môi trường để phát hiện Inference Engine.
+
+nguồn l_openvino_toolkit_ubuntu20_2022.2.0.7713.af16ea1d79a_x86_64.tgz/setupvars.sh
+
+8. Biên dịch và cài đặt OpenCV.
+
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DOPENCV_EXTRA_MODULES_PATH=/home/pse/Downloads/opencv_contrib/modules -DWITH_OPENVINO=ON -DPYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages ..
+
+tạo -j5
+
+sudo thực hiện cài đặt
+
+9. Mở Terminal mới và nhập OpenCV bằng Python.

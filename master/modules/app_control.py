@@ -244,7 +244,7 @@ import json
 from random import choice
 import webbrowser
 
-data = json.load(open('assets/websites.json', encoding='utf-8'))
+data = json.load(open('master/assets/websites.json', encoding='utf-8'))
 
 def open_website(query):
 	query = query.replace('open','')
